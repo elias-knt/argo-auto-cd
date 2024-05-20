@@ -1,12 +1,11 @@
-application:
-  name: teste-deploy-auto-cd
-  repo: https://github.com/konecty/konecty-k8s.git
-  path: foxter-dev/backoffice-foxter-ofertaativa/
-  dest_namespace: foxter-dev
-  dest_server: https://bc914ae8-4f18-4726-9bec-e90acc12197c.k8s.ondigitalocean.com
-  project: development
-  grpc_web: true
-  revision: development
-  labels:
-    - ns=foxter-dev
-    - type=teste-deploy-auto-cd
+name: teste-deploy-auto-cd
+repo: https://github.com/konecty/konecty-k8s.git
+path: foxter-dev/backoffice-foxter-ofertaativa/
+dest_namespace: foxter-dev
+dest_server: https://bc914ae8-4f18-4726-9bec-e90acc12197c.k8s.ondigitalocean.com
+project: development
+grpc_web: true
+revision: development
+labels:
+  - ns=foxter-dev
+  - type=teste-deploy-auto-cd
