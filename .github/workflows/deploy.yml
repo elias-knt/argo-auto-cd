@@ -24,29 +24,17 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Install ArgoCD CLI
+      - name: Install ArgoCD CLI and Create ArgoCD Application
         run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+          # Instalação do ArgoCD CLI se não estiver instalado
+          if ! command -v argocd &> /dev/null; then
+            curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            chmod +x argocd-linux-amd64
+            sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+          fi
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
-
-      - name: Port forward to Argo CD server
-        run: |
-          kubectl port-forward service/argocd-server 8080:80 -n argocd &
-          sleep 5
-
-      - name: Log in to ArgoCD
-        run: |
-          yes | argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
-
-      - name: Read ArgoCD deploy template
-        id: read-template
-        run: |
+          # Leitura do template ArgoCD
+          YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
           APP_NAME=$(yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           REPO=$(yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           PATH=$(yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
@@ -88,10 +76,5 @@ jobs:
           fi
           COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune --dest-branch \"$REVISION\""
 
-          echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
-
-      - name: Create ArgoCD Application
-        run: |
+          # Executando o comando argocd app create
           eval "${COMMAND}"
-        env:
-          COMMAND: ${{ env.COMMAND }}
