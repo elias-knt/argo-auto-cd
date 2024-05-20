@@ -32,6 +32,11 @@ jobs:
             sudo mv argocd-linux-amd64 /usr/local/bin/argocd
           fi
 
+      - name: Install yq
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
       - name: Port forward to Argo CD server
         run: |
           kubectl port-forward service/argocd-server 8080:80 -n argocd &
@@ -83,16 +88,12 @@ jobs:
           if [ -n "$LABELS" ]; then
             COMMAND="$COMMAND -l \"$LABELS\""
           fi
-          COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune --dest-branch \"$REVISION\""
+          COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune"
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
       - name: Create ArgoCD Application
         run: |
-          /usr/local/bin/argocd app create --name "${APP_NAME}" --repo "${REPO}" --path "${PATH}" --revision "${REVISION}" --sync-policy automated --self-heal --auto-prune --dest-branch "${REVISION}" ${LABELS}
+          eval "${COMMAND}"
         env:
-          APP_NAME: ${{ steps.read-template.outputs.APP_NAME }}
-          REPO: ${{ steps.read-template.outputs.REPO }}
-          PATH: ${{ steps.read-template.outputs.PATH }}
-          REVISION: ${{ steps.read-template.outputs.REVISION }}
-          LABELS: ${{ steps.read-template.outputs.LABELS }}
+          COMMAND: ${{ env.COMMAND }}
