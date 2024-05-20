@@ -59,6 +59,9 @@ jobs:
           REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
+          # Definindo a branch padrão como 'main' se não estiver especificada no YAML
+          BRANCH=$(yq e '.branch // "main"' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "main")
+
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
           if [ -n "$APP_NAME" ]; then
@@ -88,6 +91,7 @@ jobs:
           if [ -n "$LABELS" ]; then
             COMMAND="$COMMAND -l \"$LABELS\""
           fi
+          COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune --dest-branch \"$BRANCH\""
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
