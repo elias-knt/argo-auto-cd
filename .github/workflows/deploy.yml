@@ -48,15 +48,15 @@ jobs:
         id: read-template
         run: |
           YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
-          APP_NAME=$(yq e '.name' - <<< "$YAML_CONTENT" || echo "")
-          REPO=$(yq e '.repo' - <<< "$YAML_CONTENT" || echo "")
-          PATH=$(yq e '.path' - <<< "$YAML_CONTENT" || echo "")
-          DEST_NAMESPACE=$(yq e '.dest_namespace' - <<< "$YAML_CONTENT" || echo "")
-          DEST_SERVER=$(yq e '.dest_server' - <<< "$YAML_CONTENT" || echo "")
-          PROJECT=$(yq e '.project' - <<< "$YAML_CONTENT" || echo "")
-          GRPC_WEB=$(yq e '.grpc_web' - <<< "$YAML_CONTENT" || echo "false")
-          REVISION=$(yq e '.revision' - <<< "$YAML_CONTENT" || echo "")
-          LABELS=$(yq e '.labels | join(" -l ")' - <<< "$YAML_CONTENT" || echo "")
+          APP_NAME=$(yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          REPO=$(yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          PATH=$(yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          DEST_NAMESPACE=$(yq e '.dest_namespace' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          DEST_SERVER=$(yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          PROJECT=$(yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          GRPC_WEB=$(yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
+          REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
