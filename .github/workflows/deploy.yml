@@ -39,7 +39,7 @@ jobs:
     - name: Port forward to Argo CD server
       run: |
         kubectl port-forward service/argocd-server 8080:80 -n argocd &
-      background: true
+        sleep 5
 
     - name: Log in to ArgoCD
       run: |
