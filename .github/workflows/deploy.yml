@@ -48,36 +48,36 @@ jobs:
         id: read-template
         run: |
           YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
-          APP_NAME=$(yq e '.name' <<< "$YAML_CONTENT" || echo "")
-          REPO=$(yq e '.repo' <<< "$YAML_CONTENT" || echo "")
-          PATH=$(yq e '.path' <<< "$YAML_CONTENT" || echo "")
-          DEST_NAMESPACE=$(yq e '.dest_namespace' <<< "$YAML_CONTENT" || echo "")
-          DEST_SERVER=$(yq e '.dest_server' <<< "$YAML_CONTENT" || echo "")
-          PROJECT=$(yq e '.project' <<< "$YAML_CONTENT" || echo "")
-          GRPC_WEB=$(yq e '.grpc_web' <<< "$YAML_CONTENT" || echo "false")
-          REVISION=$(yq e '.revision' <<< "$YAML_CONTENT" || echo "")
-          LABELS=$(yq e '.labels | join(" -l ")' <<< "$YAML_CONTENT" || echo "")
+          APP_NAME=$(yq e '.name' - <<< "$YAML_CONTENT" || echo "")
+          REPO=$(yq e '.repo' - <<< "$YAML_CONTENT" || echo "")
+          PATH=$(yq e '.path' - <<< "$YAML_CONTENT" || echo "")
+          DEST_NAMESPACE=$(yq e '.dest_namespace' - <<< "$YAML_CONTENT" || echo "")
+          DEST_SERVER=$(yq e '.dest_server' - <<< "$YAML_CONTENT" || echo "")
+          PROJECT=$(yq e '.project' - <<< "$YAML_CONTENT" || echo "")
+          GRPC_WEB=$(yq e '.grpc_web' - <<< "$YAML_CONTENT" || echo "false")
+          REVISION=$(yq e '.revision' - <<< "$YAML_CONTENT" || echo "")
+          LABELS=$(yq e '.labels | join(" -l ")' - <<< "$YAML_CONTENT" || echo "")
 
           COMMAND="argocd app create $APP_NAME"
-          if [ -n "$REPO" ]; then
+          if [ -n "$REPO" ] && [ "$REPO" != "null" ]; then
             COMMAND="$COMMAND --repo $REPO"
           fi
-          if [ -n "$PATH" ]; then
+          if [ -n "$PATH" ] && [ "$PATH" != "null" ]; then
             COMMAND="$COMMAND --path $PATH"
           fi
-          if [ -n "$DEST_NAMESPACE" ]; then
+          if [ -n "$DEST_NAMESPACE" ] && [ "$DEST_NAMESPACE" != "null" ]; then
             COMMAND="$COMMAND --dest-namespace $DEST_NAMESPACE"
           fi
-          if [ -n "$DEST_SERVER" ]; then
+          if [ -n "$DEST_SERVER" ] && [ "$DEST_SERVER" != "null" ]; then
             COMMAND="$COMMAND --dest-server $DEST_SERVER"
           fi
-          if [ -n "$PROJECT" ]; then
+          if [ -n "$PROJECT" ] && [ "$PROJECT" != "null" ]; then
             COMMAND="$COMMAND --project $PROJECT"
           fi
           if [ "$GRPC_WEB" = "true" ]; then
             COMMAND="$COMMAND --grpc-web"
           fi
-          if [ -n "$REVISION" ]; then
+          if [ -n "$REVISION" ] && [ "$REVISION" != "null" ]; then
             COMMAND="$COMMAND --revision $REVISION"
           fi
           if [ -n "$LABELS" ]; then
