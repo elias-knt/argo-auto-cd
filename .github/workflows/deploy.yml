@@ -29,7 +29,6 @@ jobs:
           curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           chmod +x argocd-linux-amd64
           sudo mv argocd-linux-amd64 /usr/local/bin/argocd
-          echo "argocd installed at $(which argocd)"
 
       - name: Install yq
         run: |
@@ -43,7 +42,7 @@ jobs:
 
       - name: Log in to ArgoCD
         run: |
-          yes | $(which argocd) login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
+          yes | argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
 
       - name: Read ArgoCD deploy template
         id: read-template
@@ -61,7 +60,7 @@ jobs:
           LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
           # Construindo o comando argocd app create com base nos valores obtidos
-          COMMAND="$(which argocd) app create"
+          COMMAND="/usr/local/bin/argocd app create"
           if [ -n "$APP_NAME" ]; then
             COMMAND="$COMMAND --name \"$APP_NAME\""
           fi
