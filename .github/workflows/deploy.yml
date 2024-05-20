@@ -45,7 +45,7 @@ jobs:
 
     - name: Log in to ArgoCD
       run: |
-        argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
+        yes | argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
 
     - name: Read ArgoCD deploy template
       id: read-template
