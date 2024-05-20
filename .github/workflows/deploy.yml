@@ -59,6 +59,7 @@ jobs:
           REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
+          # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
           if [ -n "$APP_NAME" ]; then
             COMMAND="$COMMAND --name \"$APP_NAME\""
