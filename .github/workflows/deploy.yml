@@ -50,7 +50,7 @@ jobs:
     - name: Read ArgoCD deploy template
       id: read-template
       run: |
-        YAML_CONTENT=$(cat deploy/argo_deploy_template.yaml)
+        YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
         APP_NAME=$(echo "$YAML_CONTENT" | yq '.application.name')
         REPO=$(echo "$YAML_CONTENT" | yq '.application.repo')
         PATH=$(echo "$YAML_CONTENT" | yq '.application.path')
@@ -59,7 +59,7 @@ jobs:
         PROJECT=$(echo "$YAML_CONTENT" | yq '.application.project')
         GRPC_WEB=$(echo "$YAML_CONTENT" | yq '.application.grpc_web')
         REVISION=$(echo "$YAML_CONTENT" | yq '.application.revision')
-        LABELS=$(echo "$YAML_CONTENT" | yq '.application.labels[]')
+        LABELS=$(echo "$YAML_CONTENT" | yq -r '.application.labels | .[]')
 
         COMMAND="argocd app create $APP_NAME --repo $REPO --path $PATH --dest-namespace $DEST_NAMESPACE --dest-server $DEST_SERVER --project $PROJECT"
         if [ "$GRPC_WEB" = "true" ]; then
