@@ -56,11 +56,8 @@ jobs:
           DEST_SERVER=$(yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           PROJECT=$(yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           GRPC_WEB=$(yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
-          REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "development")
           LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-
-          # Definindo a branch padrão como 'main' se não estiver especificada no YAML
-          BRANCH=$(yq e '.branch // "main"' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "main")
 
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
@@ -91,7 +88,7 @@ jobs:
           if [ -n "$LABELS" ]; then
             COMMAND="$COMMAND -l \"$LABELS\""
           fi
-          COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune --dest-branch \"$BRANCH\""
+          COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune --dest-branch \"$REVISION\""
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
