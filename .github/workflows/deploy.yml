@@ -94,6 +94,6 @@ jobs:
 
       - name: Create ArgoCD Application
         run: |
-          eval $COMMAND
+          eval "${COMMAND}"
         env:
           COMMAND: ${{ env.COMMAND }}
