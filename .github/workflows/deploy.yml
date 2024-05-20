@@ -24,11 +24,13 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Install ArgoCD CLI (for tunneling and login)
+      - name: Ensure ArgoCD CLI is installed
         run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+          if ! command -v argocd &> /dev/null; then
+            curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+            chmod +x argocd-linux-amd64
+            sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+          fi
 
       - name: Port forward to Argo CD server
         run: |
@@ -38,12 +40,6 @@ jobs:
       - name: Log in to ArgoCD
         run: |
           yes | argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
-
-      - name: Install ArgoCD CLI (again for app create)
-        run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
 
       - name: Read ArgoCD deploy template
         id: read-template
@@ -93,6 +89,10 @@ jobs:
 
       - name: Create ArgoCD Application
         run: |
-          eval "${COMMAND}"
+          /usr/local/bin/argocd app create --name "${APP_NAME}" --repo "${REPO}" --path "${PATH}" --revision "${REVISION}" --sync-policy automated --self-heal --auto-prune --dest-branch "${REVISION}" ${LABELS}
         env:
-          COMMAND: ${{ env.COMMAND }}
+          APP_NAME: ${{ steps.read-template.outputs.APP_NAME }}
+          REPO: ${{ steps.read-template.outputs.REPO }}
+          PATH: ${{ steps.read-template.outputs.PATH }}
+          REVISION: ${{ steps.read-template.outputs.REVISION }}
+          LABELS: ${{ steps.read-template.outputs.LABELS }}
