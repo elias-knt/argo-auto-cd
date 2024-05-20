@@ -42,10 +42,9 @@ jobs:
           # Mostra o local do binário do ArgoCD CLI
           echo "Local do binário do ArgoCD CLI: $(command -v argocd)"
 
-      - name: Install yq
-        run: |
-          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-          sudo chmod +x /usr/bin/yq
+      - name: Wait for ArgoCD setup
+        run: sleep 10
+        if: success()
 
       - name: Port forward to Argo CD server
         run: |
