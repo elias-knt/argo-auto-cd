@@ -24,20 +24,23 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
-      # Primeira instalação do ArgoCD CLI
+      # Instalação do ArgoCD CLI e verificação
       - name: Install ArgoCD CLI
-        run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
-
-      - name: Ensure ArgoCD CLI is installed
         run: |
           if ! command -v argocd &> /dev/null; then
             curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
             chmod +x argocd-linux-amd64
             sudo mv argocd-linux-amd64 /usr/local/bin/argocd
           fi
+          
+          # Verifica se o CLI do ArgoCD está instalado corretamente
+          if ! command -v argocd &> /dev/null; then
+            echo "Erro: CLI do ArgoCD não foi instalado corretamente."
+            exit 1
+          fi
+
+          # Mostra o local do binário do ArgoCD CLI
+          echo "Local do binário do ArgoCD CLI: $(command -v argocd)"
 
       - name: Install yq
         run: |
@@ -99,7 +102,7 @@ jobs:
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
-      # Segunda instalação do ArgoCD CLI antes de executar o comando
+      # Instalação do ArgoCD CLI novamente antes de executar o comando
       - name: Install ArgoCD CLI for deploy
         run: |
           curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
