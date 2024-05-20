@@ -74,8 +74,8 @@ jobs:
           # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'revision' do YAML
           REVISION=$(/usr/bin/yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
           
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair os valores da chave 'labels' do YAML e os junta com " -l "
-          LABELS=$(/usr/bin/yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair os valores da chave 'labels' do YAML e os junta com " -l ", se existirem
+          LABELS=$(/usr/bin/yq e '.labels // [] | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
