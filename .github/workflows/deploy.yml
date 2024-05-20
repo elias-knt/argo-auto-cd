@@ -35,82 +35,54 @@ jobs:
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
 
-      - name: Port forward to Argo CD server
-        run: |
-          kubectl port-forward service/argocd-server 8080:80 -n argocd &
-          sleep 5
-
-      - name: Log in to ArgoCD
-        run: |
-          yes | argocd login localhost:8080 --username=${{ secrets.ARGO_LOGIN }} --password=${{ secrets.ARGO_PASSWORD }} --insecure
-
       - name: Read ArgoCD deploy template
         id: read-template
         run: |
-          # Lê o conteúdo do arquivo YAML e armazena na variável YAML_CONTENT
           YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
           
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'name' do YAML
-          APP_NAME=$(/usr/bin/yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'repo' do YAML
-          REPO=$(/usr/bin/yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'path' do YAML
-          PATH=$(/usr/bin/yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'dest_namespace' do YAML
-          DEST_NAMESPACE=$(/usr/bin/yq e '.dest_namespace' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'dest_server' do YAML
-          DEST_SERVER=$(/usr/bin/yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'project' do YAML
-          PROJECT=$(/usr/bin/yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'grpc_web' do YAML, com valor padrão 'false' se não estiver definido
-          GRPC_WEB=$(/usr/bin/yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'revision' do YAML
-          REVISION=$(/usr/bin/yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          
-          # Utiliza yq (localizado em /usr/bin/yq) para extrair os valores da chave 'labels' do YAML e os junta com " -l ", se existirem
-          LABELS=$(/usr/bin/yq e '.labels // [] | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          APP_NAME=$(yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          REPO=$(yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          PATH=$(yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          DEST_NAMESPACE=$(yq e '.dest_namespace' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          DEST_SERVER=$(yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          PROJECT=$(yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          GRPC_WEB=$(yq e '.grpc_web // false' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" | tr '[:upper:]' '[:lower:]' || echo "false")
+          REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          LABELS=$(yq e '.labels // [] | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
-          # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
           if [ -n "$APP_NAME" ]; then
-            COMMAND="$COMMAND --name $APP_NAME"
+            COMMAND="$COMMAND --name \"$APP_NAME\""
           fi
           if [ -n "$REPO" ]; then
-            COMMAND="$COMMAND --repo $REPO"
+            COMMAND="$COMMAND --repo \"$REPO\""
           fi
           if [ -n "$PATH" ]; then
-            COMMAND="$COMMAND --path $PATH"
+            COMMAND="$COMMAND --path \"$PATH\""
           fi
           if [ -n "$DEST_NAMESPACE" ]; then
-            COMMAND="$COMMAND --dest-namespace $DEST_NAMESPACE"
+            COMMAND="$COMMAND --dest-namespace \"$DEST_NAMESPACE\""
           fi
           if [ -n "$DEST_SERVER" ]; then
-            COMMAND="$COMMAND --dest-server $DEST_SERVER"
+            COMMAND="$COMMAND --dest-server \"$DEST_SERVER\""
           fi
           if [ -n "$PROJECT" ]; then
-            COMMAND="$COMMAND --project $PROJECT"
+            COMMAND="$COMMAND --project \"$PROJECT\""
           fi
           if [ "$GRPC_WEB" = "true" ]; then
             COMMAND="$COMMAND --grpc-web"
           fi
           if [ -n "$REVISION" ]; then
-            COMMAND="$COMMAND --revision $REVISION"
+            COMMAND="$COMMAND --revision \"$REVISION\""
           fi
           if [ -n "$LABELS" ]; then
-            COMMAND="$COMMAND -l $LABELS"
+            COMMAND="$COMMAND -l \"$LABELS\""
           fi
 
-          echo "COMMAND=$COMMAND" >> $GITHUB_ENV
+          echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
       - name: Create ArgoCD Application
         run: |
-          eval $COMMAND
+          eval "$COMMAND"
         env:
           COMMAND: ${{ env.COMMAND }}
