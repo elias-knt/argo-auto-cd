@@ -48,15 +48,15 @@ jobs:
       id: read-template
       run: |
         YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
-        APP_NAME=$(echo "$YAML_CONTENT" | yq e '.name' -)
-        REPO=$(echo "$YAML_CONTENT" | yq e '.repo' -)
-        PATH=$(echo "$YAML_CONTENT" | yq e '.path' -)
-        DEST_NAMESPACE=$(echo "$YAML_CONTENT" | yq e '.dest_namespace' -)
-        DEST_SERVER=$(echo "$YAML_CONTENT" | yq e '.dest_server' -)
-        PROJECT=$(echo "$YAML_CONTENT" | yq e '.project' -)
-        GRPC_WEB=$(echo "$YAML_CONTENT" | yq e '.grpc_web' -)
-        REVISION=$(echo "$YAML_CONTENT" | yq e '.revision' -)
-        LABELS=$(echo "$YAML_CONTENT" | yq e '.labels[]' -)
+        APP_NAME=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.name' -)
+        REPO=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.repo' -)
+        PATH=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.path' -)
+        DEST_NAMESPACE=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.dest_namespace' -)
+        DEST_SERVER=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.dest_server' -)
+        PROJECT=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.project' -)
+        GRPC_WEB=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.grpc_web' -)
+        REVISION=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.revision' -)
+        LABELS=$(echo "$YAML_CONTENT" | /usr/bin/yq e '.labels[]' -)
 
         COMMAND="argocd app create $APP_NAME --repo $REPO --path $PATH --dest-namespace $DEST_NAMESPACE --dest-server $DEST_SERVER --project $PROJECT"
         if [ "$GRPC_WEB" = "true" ]; then
