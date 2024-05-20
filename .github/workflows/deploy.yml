@@ -24,6 +24,13 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
+      # Primeira instalação do ArgoCD CLI
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd-linux-amd64
+          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
+
       - name: Ensure ArgoCD CLI is installed
         run: |
           if ! command -v argocd &> /dev/null; then
@@ -91,6 +98,13 @@ jobs:
           COMMAND="$COMMAND --sync-policy automated --self-heal --auto-prune"
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
+
+      # Segunda instalação do ArgoCD CLI antes de executar o comando
+      - name: Install ArgoCD CLI for deploy
+        run: |
+          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd-linux-amd64
+          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
 
       - name: Create ArgoCD Application
         run: |
