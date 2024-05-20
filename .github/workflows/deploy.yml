@@ -47,16 +47,35 @@ jobs:
       - name: Read ArgoCD deploy template
         id: read-template
         run: |
+          # Lê o conteúdo do arquivo YAML e armazena na variável YAML_CONTENT
           YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
-          APP_NAME=$(yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          REPO=$(yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          PATH=$(yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          DEST_NAMESPACE=$(yq e '.dest_namespace' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          DEST_SERVER=$(yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          PROJECT=$(yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          GRPC_WEB=$(yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
-          REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-          LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'name' do YAML
+          APP_NAME=$(/usr/bin/yq e '.name' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'repo' do YAML
+          REPO=$(/usr/bin/yq e '.repo' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'path' do YAML
+          PATH=$(/usr/bin/yq e '.path' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'dest_namespace' do YAML
+          DEST_NAMESPACE=$(/usr/bin/yq e '.dest_namespace' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'dest_server' do YAML
+          DEST_SERVER=$(/usr/bin/yq e '.dest_server' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'project' do YAML
+          PROJECT=$(/usr/bin/yq e '.project' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'grpc_web' do YAML, com valor padrão 'false' se não estiver definido
+          GRPC_WEB=$(/usr/bin/yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair o valor da chave 'revision' do YAML
+          REVISION=$(/usr/bin/yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
+          
+          # Utiliza yq (localizado em /usr/bin/yq) para extrair os valores da chave 'labels' do YAML e os junta com " -l "
+          LABELS=$(/usr/bin/yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
 
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="argocd app create"
