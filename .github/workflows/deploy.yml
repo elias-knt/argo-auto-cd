@@ -8,23 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
       - name: Set up Kubeconfig
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KONECTY_KUBECONFIG }}" > $HOME/.kube/config
-
+        
       - name: Install kubectl
         run: |
           curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
-
-      # Instalação do ArgoCD CLI e verificação
+          
       - name: Install ArgoCD CLI
         run: |
           if ! command -v argocd &> /dev/null; then
@@ -33,13 +32,11 @@ jobs:
             sudo mv argocd-linux-amd64 /usr/local/bin/argocd
           fi
           
-          # Verifica se o CLI do ArgoCD está instalado corretamente
           if ! command -v argocd &> /dev/null; then
             echo "Erro: CLI do ArgoCD não foi instalado corretamente."
             exit 1
           fi
-
-          # Mostra o local do binário do ArgoCD CLI
+          
           echo "Local do binário do ArgoCD CLI: $(command -v argocd)"
 
       - name: Wait for ArgoCD setup
@@ -67,7 +64,7 @@ jobs:
           GRPC_WEB=$(yq e '.grpc_web' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "false")
           REVISION=$(yq e '.revision' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "development")
           LABELS=$(yq e '.labels | join(" -l ")' "$GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml" || echo "")
-
+          
           # Construindo o comando argocd app create com base nos valores obtidos
           COMMAND="/usr/local/bin/argocd app create"
           if [ -n "$APP_NAME" ]; then
@@ -101,15 +98,7 @@ jobs:
 
           echo "COMMAND=\"$COMMAND\"" >> $GITHUB_ENV
 
-      # Instalação do ArgoCD CLI novamente antes de executar o comando
-      - name: Install ArgoCD CLI for deploy
-        run: |
-          curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x argocd-linux-amd64
-          sudo mv argocd-linux-amd64 /usr/local/bin/argocd
-
       - name: Create ArgoCD Application
-        run: |
-          eval "${COMMAND}"
+        run: ${{ env.COMMAND }}
         env:
           COMMAND: ${{ env.COMMAND }}
