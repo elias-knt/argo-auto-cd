@@ -48,21 +48,38 @@ jobs:
         id: read-template
         run: |
           YAML_CONTENT=$(cat $GITHUB_WORKSPACE/deploy/argo_deploy_template.yaml)
-          APP_NAME=$(echo "$YAML_CONTENT" | yq e '.name' -)
-          REPO=$(echo "$YAML_CONTENT" | yq e '.repo' -)
-          PATH=$(echo "$YAML_CONTENT" | yq e '.path' -)
-          DEST_NAMESPACE=$(echo "$YAML_CONTENT" | yq e '.dest_namespace' -)
-          DEST_SERVER=$(echo "$YAML_CONTENT" | yq e '.dest_server' -)
-          PROJECT=$(echo "$YAML_CONTENT" | yq e '.project' -)
-          GRPC_WEB=$(echo "$YAML_CONTENT" | yq e '.grpc_web' -)
-          REVISION=$(echo "$YAML_CONTENT" | yq e '.revision' -)
-          LABELS=$(echo "$YAML_CONTENT" | yq e '.labels | join(" -l ")' -)
+          APP_NAME=$(yq e '.name' <<< "$YAML_CONTENT" || echo "")
+          REPO=$(yq e '.repo' <<< "$YAML_CONTENT" || echo "")
+          PATH=$(yq e '.path' <<< "$YAML_CONTENT" || echo "")
+          DEST_NAMESPACE=$(yq e '.dest_namespace' <<< "$YAML_CONTENT" || echo "")
+          DEST_SERVER=$(yq e '.dest_server' <<< "$YAML_CONTENT" || echo "")
+          PROJECT=$(yq e '.project' <<< "$YAML_CONTENT" || echo "")
+          GRPC_WEB=$(yq e '.grpc_web' <<< "$YAML_CONTENT" || echo "false")
+          REVISION=$(yq e '.revision' <<< "$YAML_CONTENT" || echo "")
+          LABELS=$(yq e '.labels | join(" -l ")' <<< "$YAML_CONTENT" || echo "")
 
-          COMMAND="argocd app create $APP_NAME --repo $REPO --path $PATH --dest-namespace $DEST_NAMESPACE --dest-server $DEST_SERVER --project $PROJECT"
+          COMMAND="argocd app create $APP_NAME"
+          if [ -n "$REPO" ]; then
+            COMMAND="$COMMAND --repo $REPO"
+          fi
+          if [ -n "$PATH" ]; then
+            COMMAND="$COMMAND --path $PATH"
+          fi
+          if [ -n "$DEST_NAMESPACE" ]; then
+            COMMAND="$COMMAND --dest-namespace $DEST_NAMESPACE"
+          fi
+          if [ -n "$DEST_SERVER" ]; then
+            COMMAND="$COMMAND --dest-server $DEST_SERVER"
+          fi
+          if [ -n "$PROJECT" ]; then
+            COMMAND="$COMMAND --project $PROJECT"
+          fi
           if [ "$GRPC_WEB" = "true" ]; then
             COMMAND="$COMMAND --grpc-web"
           fi
-          COMMAND="$COMMAND --revision $REVISION"
+          if [ -n "$REVISION" ]; then
+            COMMAND="$COMMAND --revision $REVISION"
+          fi
           if [ -n "$LABELS" ]; then
             COMMAND="$COMMAND -l $LABELS"
           fi
